@@ -11,13 +11,17 @@ import android.content.IntentFilter
 import android.content.res.Configuration
 import android.graphics.drawable.Icon
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.util.Rational
 import android.view.View
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintSet
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import com.shang.floatingthumbnailgenerator.databinding.ActivityMainBinding
 import com.yalantis.ucrop.UCrop
 import java.io.File
@@ -44,9 +48,6 @@ class MainActivity : AppCompatActivity() {
     private var mDenominator = 9
     private var mTempImage: Uri? = null
 
-    /**
-     * A [BroadcastReceiver] for handling action items on the picture-in-picture mode.
-     */
     private val broadcastReceiver = object : BroadcastReceiver() {
 
         // Called when an item is clicked.
@@ -117,11 +118,18 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun updatePictureInPictureParams(): PictureInPictureParams {
-        val params = PictureInPictureParams.Builder()
-            .setAspectRatio(Rational(mNumerator, mDenominator))
-            .setAutoEnterEnabled(true)
-            .setSeamlessResizeEnabled(false)
-            .build()
+        val params = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            PictureInPictureParams.Builder()
+                .setAspectRatio(Rational(mNumerator, mDenominator))
+                .setAutoEnterEnabled(true)
+                .setSeamlessResizeEnabled(false)
+                .build()
+        } else {
+            PictureInPictureParams.Builder()
+                .setAspectRatio(Rational(mNumerator, mDenominator))
+                .build()
+        }
+
         setPictureInPictureParams(params)
         return params
     }
